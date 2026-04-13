@@ -6,7 +6,13 @@ const mqtt = require("mqtt");
 const { Op } = require("sequelize");
 
 const { connectDB } = require("./config/connectDB");
-const { Devices } = require("./models");
+const { Devices, DeviceLogs } = require("./models");
+const {logDeviceEvent} = require("./services/logsService")
+
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
 
 const app = express();
 const PORT = 9001;
@@ -14,6 +20,20 @@ const PORT = 9001;
 app.use(cors());
 app.use(express.json());
 
+const io = new Server(server, {
+    cors: {
+        origin: "*"
+    }
+});
+
+
+io.on("connection", (socket) => {
+    console.log("🟢 Client connected:", socket.id);
+
+    socket.on("disconnect", () => {
+        console.log("🔴 Client disconnected:", socket.id);
+    });
+});
 /* =========================
    MQTT SETUP
 ========================= */
@@ -70,14 +90,29 @@ client.on("message", async (topic, message) => {
         switch (type) {
             case "status":
                 await handleStatus(device, payload);
+                io.emit("device:update", {
+    deviceId,
+    status: payload
+});
                 break;
 
             case "heartbeat":
                 await handleHeartbeat(device);
+                io.emit("device:heartbeat", {
+    deviceId,
+    lastSeen: new Date()
+});
                 break;
 
             case "config/ack":
-                console.log(`✅ Config ACK from ${deviceId}`);
+                await logDeviceEvent({
+        deviceId,
+        event: "config_ack",
+        message: "Config acknowledged"
+    });
+    io.emit("device:config_ack", {
+    deviceId
+});
                 break;
         }
         console.log("🚀 ~ type:", type)
@@ -91,26 +126,47 @@ client.on("message", async (topic, message) => {
    HANDLERS
 ========================= */
 
-async function handleStatus(device, status) {
+const handleStatus = async (device, status) => {
     await device.update({ status });
 
-    if (status === "online") {
-        resetHeartbeatTimer(device.device_id);
+    await logDeviceEvent({
+        deviceId: device.device_id,
+        event: "status",
+        message: `Device is ${status}`
+    });
+
+    if( status === "online")
+    {
+        resetHeartbeatTimer(device.device_id); 
     }
 
-    if (status === "offline") {
+    if(status === "offline")
+    {
         clearHeartbeatTimer(device.device_id);
     }
+};
+
+function shouldLogHeartbeat() {
+    return Math.random() < 0.1; // 10%
 }
 
-async function handleHeartbeat(device) {
+const handleHeartbeat = async (device) => {
     await device.update({
         last_seen: new Date(),
         status: "online"
     });
 
-    resetHeartbeatTimer(device.device_id);
+    // ✅ SAMPLE ONLY 10% OF HEARTBEATS
+    if (shouldLogHeartbeat()) {
+    await logDeviceEvent({
+        deviceId: device.device_id,
+        event: "heartbeat",
+        message: "Heartbeat received"
+    });
 }
+
+    resetHeartbeatTimer(device.device_id);
+};
 
 /* =========================
    TIMER MANAGEMENT
@@ -121,18 +177,21 @@ function resetHeartbeatTimer(deviceId) {
         clearTimeout(deviceTimers.get(deviceId));
     }
 
-    const timer = setTimeout(async () => {
-        try {
-            await Devices.update(
-                { status: "offline" },
-                { where: { device_id: deviceId } }
-            );
-deviceTimers.delete(deviceId);
-            console.log(`⚠️ ${deviceId} OFFLINE (heartbeat timeout)`);
 
-        } catch (err) {
-            console.error("Timer error:", err);
-        }
+    // offline timeout
+    const timer  = setTimeout(async () => {
+        await Devices.update(
+            {status: "offline"},
+            {where: {device_id: deviceId}}
+        );
+
+        await logDeviceEvent({
+            deviceId,
+            event: "offline",
+            message: "Heartbeat timeout"
+        });
+
+        deviceTimers.delete(deviceId);
     }, HEARTBEAT_TIMEOUT);
 
     deviceTimers.set(deviceId, timer);
@@ -162,6 +221,13 @@ function sendConfig(deviceId) {
         { qos: 1 }
     );
 
+    logDeviceEvent({
+        deviceId,
+        event: "config_sent",
+        message: "Config sent",
+        meta: config
+    });
+
     console.log(`🚀 Config sent to ${deviceId}`);
 }
 
@@ -173,6 +239,15 @@ app.get("/devices", async (req, res) => {
     const devices = await Devices.findAll();
     res.json(devices);
 });
+
+app.get("/logs", async (req, res) => {
+    const logs = await DeviceLogs.findAll({
+        limit: 50,
+        order: [["createdAt", "DESC"]]
+    });
+
+    res.json(logs);
+})
 
 /* =========================
    RECOVERY (IMPORTANT)
@@ -215,7 +290,7 @@ const startServer = async () => {
 
         await recoverOfflineDevices();
 
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`🚀 Server running on http://localhost:${PORT}`);
         });
 
