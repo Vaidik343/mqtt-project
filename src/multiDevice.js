@@ -41,11 +41,20 @@ function createDevice(deviceId) {
     });
 
     client.on("message", (topic, message) => {
-        console.log(`⚙️ ${deviceId} received config: ${message.toString()}`);
+  const payload = JSON.parse(message.toString());
 
-        // Send ACK
-        client.publish(`devices/${deviceId}/config/ack`, "success");
-    });
+  if (topic.includes("/config")) {
+    console.log(`${deviceId} received config`, payload);
+
+    // simulate applying config
+    setTimeout(() => {
+      client.publish(
+        `devices/${deviceId}/config/ack`,
+        JSON.stringify({ version: payload.version })
+      );
+    }, 1000);
+  }
+});
 
     client.on("close", () => {
         console.log(`❌ ${deviceId} disconnected`);

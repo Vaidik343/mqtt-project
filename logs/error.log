@@ -1,0 +1,20 @@
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.317Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.335Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.347Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.351Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.359Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.363Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.365Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.367Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.374Z"}
+{"error":"relation \"device_logs\" does not exist","level":"error","message":"Log service error","timestamp":"2026-04-13T10:18:15.392Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.075Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.078Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.080Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.081Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.082Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.083Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.083Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.084Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.087Z"}
+{"error":"notNull Violation: DeviceLogs.device_id cannot be null","level":"error","message":"Log service error","timestamp":"2026-04-13T10:57:04.088Z"}

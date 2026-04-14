@@ -22,6 +22,24 @@ status: {
             last_seen: {
                 type:DataTypes.DATE
             },
+            config: {
+  type: DataTypes.JSONB,
+  defaultValue: {
+    ip: "192.168.1.10",
+    volume: 5
+  }
+},
+config_version: {
+  type: DataTypes.INTEGER,
+  defaultValue: 1
+},
+config_status: {
+  type: DataTypes.ENUM("pending", "applied"),
+  defaultValue: "pending"
+},
+ip: {
+  type: DataTypes.STRING
+}
         },
             {
       tableName: "devices",
